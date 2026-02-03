@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+  xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+	http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+  <!-- 1. Global Listener Config -->
+	<http:listener-config name="HTTP_Listener_config">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+
+	<flow name="order-management-flow">
+		<http:listener config-ref="HTTP_Listener_config" path="/orders/{orderId}" doc:name="Listener" />
+		
+		<!-- 2. SIMULATE SAP CALL -->
+		<ee:transform doc:name="Mock SAP Response">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+				output application/json
+				---
+				{
+					"orderId": attributes.uriParams.orderId,
+					"status": if (attributes.uriParams.orderId == "123") "Shipped" else "Pending",
+					"customer": "John Doe"
+				}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" variableName="sapData" />
+
+		<!-- 3. LOGIC ROUTER -->
+		<choice doc:name="Choice">
+			<when expression="#[payload.status == 'Shipped']">
+				<try doc:name="Try">
+					<!-- 4. SIMULATE CARRIER CALL -->
+					<ee:transform doc:name="Mock Carrier Response">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								"trackingEvents": ["Picked up", "In Transit", "Out for Delivery"]
+							}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<error-handler>
+						<on-error-continue type="ANY">
+							<set-payload value='#["tracking temporarily unavailable"]'/>
+						</on-error-continue>
+					</error-handler>
+				</try>
+				
+				<!-- 5. NORMALIZE FINAL RESPONSE (SHIPPED) -->
+				<ee:transform doc:name="Final Result Shipped">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+						output application/json
+						---
+						{
+							"orderId": vars.sapData.orderId,
+							"status": vars.sapData.status,
+							"trackingDetails": payload.trackingEvents default "tracking temporarily unavailable"
+						}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<!-- 6. FINAL RESPONSE (PENDING) -->
+				<ee:transform doc:name="Final Result Pending">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+						output application/json
+						---
+						{
+							"orderId": vars.sapData.orderId,
+							"status": vars.sapData.status,
+							"message": "Order has not left our warehouse yet."
+						}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
