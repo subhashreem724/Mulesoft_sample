@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "atlassian": {
+    "test": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-atlassian"],
       "env": {
