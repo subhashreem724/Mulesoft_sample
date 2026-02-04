@@ -4,6 +4,7 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-atlassian"],
       "env": {
+        "CONFLUENCE_URL":"https://nttdata-team-ai-poc.atlassian.net",
         "ATLASSIAN_DOMAIN": "https://nttdata-team-ai-poc.atlassian.net",
         "ATLASSIAN_USER_EMAIL": "subhashree.mishra@global.nttdata.com" ,
  	"ATLASSIAN_API_TOKEN": "ATATT3xFfGF0u_FeTgReo8rDev3YUFwWNk37g0XIzgX_uNMsjxxTgfjE7Jmtt2OgsN7o9zxIprY4ju6uxmWnbpY6sRd1gWnq3M0amTtbenOqbtLTM2RL6tlo1q3kx3Lma0xVZQ9GXQWhjmYNTdSNdiuXLfkXd1Hxfh7-g5t6N--0kK8_VmfScLY=A4C4AB35"
