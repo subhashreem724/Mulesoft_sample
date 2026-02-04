@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<munit:config name="order-management-app-test-suite.xml" />
+	<munit:test name="order-management-app-test-suite-order-management-flowTest" doc:id="184964e5-4e7a-4c28-8980-08709e99c10c" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f4e8b3e5-0e7a-4c28-8980-08709e99c10c">
+				<munit:attributes value="#[{uriParams : {orderId : '123' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" doc:id="f5e8b3e5-0e7a-4c28-8980-08709e99c10c" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="f6e8b3e5-0e7a-4c28-8980-08709e99c10c" expression="#[payload.status]" is="#[munit-tools:equalTo('Shipped')]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="order-management-app-test-suite-order-management-flow-ErrorTest" doc:id="194964e5-4e7a-4c28-8980-08709e99c10c" description="Test Error Message">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f7e8b3e5-0e7a-4c28-8980-08709e99c10c" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Mock Carrier Response" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f8e8b3e5-0e7a-4c28-8980-08709e99c10c">
+				<munit:attributes value="#[{uriParams : {orderId : '123' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" doc:id="f9e8b3e5-0e7a-4c28-8980-08709e99c10c" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="g1e8b3e5-0e7a-4c28-8980-08709e99c10c" expression="#[payload.trackingDetails]" is="#[munit-tools:equalTo('Tracking unavailable at the moment !!')]"/>
+		</munit:validation>
+	</munit:test>
+
+    <munit:test name="order-management-app-test-suite-order-management-flow-PendingTest" doc:id="204964e5-4e7a-4c28-8980-08709e99c10c" description="Test Pending Order">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="g2e8b3e5-0e7a-4c28-8980-08709e99c10c">
+				<munit:attributes value="#[{uriParams : {orderId : '456' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" doc:id="g3e8b3e5-0e7a-4c28-8980-08709e99c10c" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="g4e8b3e5-0e7a-4c28-8980-08709e99c10c" expression="#[payload.status]" is="#[munit-tools:equalTo('Pending')]"/>
+		</munit:validation>
+	</munit:test>
+
+</mule>
