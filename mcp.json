@@ -1,8 +1,11 @@
 {
   "mcpServers": {
     "test": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-atlassian@latest"],
+     "command": "node",
+      "args": [
+        "-e",
+        "import('child_process').then(cp => cp.spawn('npx', ['-y', '@modelcontextprotocol/server-atlassian@latest'], {stdio: 'inherit', shell: true}))"
+      ],
       "env": {
         "ATLASSIAN_URL": "https://nttdata-team-ai-poc.atlassian.net",
         "ATLASSIAN_USER_EMAIL": "subhashree.mishra@global.nttdata.com" ,
