@@ -2,7 +2,7 @@
   "mcpServers": {
     "test": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-atlassian"],
+      "args": ["-y", "@modelcontextprotocol/server-atlassian@latest"],
       "env": {
         "CONFLUENCE_URL":"https://nttdata-team-ai-poc.atlassian.net",
         "ATLASSIAN_DOMAIN": "https://nttdata-team-ai-poc.atlassian.net",
