@@ -12,7 +12,12 @@ on:
         description: "Alias of the agent to run (will run default agent if not provided)"
         required: false
         default: ""
-
+        
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  
 jobs:
   agent-run:
     runs-on: ubuntu-latest
