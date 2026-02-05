@@ -1,0 +1,4 @@
+target/
+.zencoder/
+zencoder
+zencoder-linux-x64
