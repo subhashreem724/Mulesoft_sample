@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="order-management-test-suite.xml" />
+	
+	<munit:test name="order-management-flow-shipped-test" doc:id="1" description="Test shipped order">
+		<munit:execution>
+			<munit:set-event doc:name="Set Event">
+				<munit:attributes value="#[{uriParams: {orderId: '123'}}] " />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert status" expression="#[payload.status]" is="#[munit-tools:equalTo('Shipped')]"/>
+			<munit-tools:assert-that doc:name="Assert tracking" expression="#[payload.trackingDetails]" is="#[munit-tools:notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="order-management-flow-pending-test" doc:id="2" description="Test pending order">
+		<munit:execution>
+			<munit:set-event doc:name="Set Event">
+				<munit:attributes value="#[{uriParams: {orderId: '456'}}] " />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert status" expression="#[payload.status]" is="#[munit-tools:equalTo('Pending')]"/>
+			<munit-tools:assert-that doc:name="Assert message" expression="#[payload.message]" is="#[munit-tools:equalTo('Order has not left our warehouse yet.')]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="order-management-flow-shipped-error-test" doc:id="3" description="Test shipped order with error">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Carrier Response" processor="ee:transform">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Mock Carrier Response" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event">
+				<munit:attributes value="#[{uriParams: {orderId: '123'}}] " />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to order-management-flow" name="order-management-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert tracking error message" expression="#[payload.trackingDetails]" is="#[munit-tools:equalTo('Tracking unavailable at the moment !!')]"/>
+		</munit:validation>
+	</munit:test>
+</mule>

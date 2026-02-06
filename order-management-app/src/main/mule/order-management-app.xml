@@ -46,7 +46,7 @@
 					</ee:transform>
 					<error-handler>
 						<on-error-continue type="ANY">
-							<set-payload value='#["tracking temporarily unavailable"]'/>
+							<set-payload value='#["Tracking unavailable at the moment !!"]'/>
 						</on-error-continue>
 					</error-handler>
 				</try>
@@ -60,7 +60,7 @@
 						{
 							"orderId": vars.sapData.orderId,
 							"status": vars.sapData.status,
-							"trackingDetails": payload.trackingEvents default "tracking temporarily unavailable"
+							"trackingDetails": payload.trackingEvents default "Tracking unavailable at the moment !!"
 						}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
